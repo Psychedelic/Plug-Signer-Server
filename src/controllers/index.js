@@ -43,8 +43,6 @@ const callRequest = async (req, res) => {
   }
 
   const { response, status } = await call(args, delegation, host);
-  console.log('response', response);
-  console.log('status', status);
 
   return res.send(response).status(status);
 }
