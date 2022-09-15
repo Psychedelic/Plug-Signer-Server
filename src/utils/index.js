@@ -1,4 +1,4 @@
-const { Ed25519KeyIdentity } = require('@dfinity/identity');
+const { Ed25519KeyIdentity, DelegationChain, DelegationIdentity } = require('@dfinity/identity');
 
 const ERROR = require('./error')
 
@@ -11,20 +11,18 @@ const createDelegationIdentity = (identity, delegationChainJSON) => {
   return DelegationIdentity.fromDelegation(identity, delegationChain);
 }
 
-const argumentsValidation = (batchTxId, args, delegation, batchData, metadata) => {
+const argumentsValidation = (savedTxData, savedMetadata, args, metadata, delegation) => {
   if (!delegation)
     return { error: ERROR.missingDelegation, status: 400 };
-  if (!validateTxData(batchData, args))
+  if (!validateTxData(savedTxData, args))
     return { error: ERROR.invalidTxData, status: 401 };
-  if (!validateMetadata(batchData.metadat, metadata))
+  if (!validateMetadata(savedMetadata, metadata))
     return { error: ERROR.invalidMetadata, status: 401 };
   return {};
 }
 
 const validateMetadata = (savedMetadata, metadata) => {
-  console.log('metadata', metadata);
-  console.log('savedMetadata', savedMetadata);
-  return savedMetadata === metadata;
+  return savedMetadata.url === metadata.url;
 }
 
 const validateTxData = (savedData, request) => {
@@ -54,9 +52,13 @@ const bufferToBase64 = (buf) => {
   return Buffer.from(buf.buffer).toString('base64');
 }
 
+const arrayBufferToBase64 = (buf) => {
+  return Buffer.from(buf).toString('base64');
+}
+
 const base64ToBuffer = (base64) => {
   return Buffer.from(base64, 'base64');
 }
 
 
-module.exports = { createEphimeralKey, createDelegationIdentity, validateTxData, argumentsValidation, bufferToBase64, base64ToBuffer };
+module.exports = { createEphimeralKey, createDelegationIdentity, validateTxData, argumentsValidation, bufferToBase64, base64ToBuffer, arrayBufferToBase64 };
